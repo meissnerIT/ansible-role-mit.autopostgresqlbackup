@@ -1,0 +1,28 @@
+---
+
+- name: "Ensure autopostgresqlbackup is installed"
+  apt: pkg=autopostgresqlbackup
+
+- name: Ensure CREATE_DATABASE=no in autopostgresqlbackup config
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='CREATE_DATABASE=' line='CREATE_DATABASE=no'
+
+- name: Set BACKUPDIR
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='BACKUPDIR=' line='BACKUPDIR="{{ autopostgresqlbackup_BACKUPDIR }}"'
+  when: autopostgresqlbackup_BACKUPDIR is defined
+
+- name: Set COMP
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='COMP=' line='COMP="{{ autopostgresqlbackup_COMP }}"'
+  when: autopostgresqlbackup_COMP is defined
+
+- name: Set DBNAMES
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='^DBNAMES=' line='DBNAMES="{{ autopostgresqlbackup_DBNAMES }}"'
+  when: autopostgresqlbackup_DBNAMES is defined
+
+- name: Set DOWEEKLY
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='DOWEEKLY=' line='DOWEEKLY="{{ autopostgresqlbackup_DOWEEKLY }}"'
+  when: autopostgresqlbackup_DOWEEKLY is defined
+
+- name: Set MAILADDR
+  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='MAILADDR=' line='MAILADDR="{{ autopostgresqlbackup_MAILADDR }}"'
+  when: autopostgresqlbackup_MAILADDR is defined
+
