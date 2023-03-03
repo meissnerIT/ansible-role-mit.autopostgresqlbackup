@@ -1,28 +1,61 @@
 ---
 
-- name: "Ensure autopostgresqlbackup is installed"
-  apt: pkg=autopostgresqlbackup
+- name: Ensure autopostgresqlbackup is installed
+  apt:
+    pkg: autopostgresqlbackup
 
 - name: Ensure CREATE_DATABASE=no in autopostgresqlbackup config
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='CREATE_DATABASE=' line='CREATE_DATABASE=no'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: 'CREATE_DATABASE='
+    line: 'CREATE_DATABASE=no'
 
 - name: Set BACKUPDIR
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='BACKUPDIR=' line='BACKUPDIR="{{ autopostgresqlbackup_BACKUPDIR }}"'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: 'BACKUPDIR='
+    line: 'BACKUPDIR="{{ autopostgresqlbackup_BACKUPDIR }}"'
   when: autopostgresqlbackup_BACKUPDIR is defined
 
 - name: Set COMP
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='COMP=' line='COMP="{{ autopostgresqlbackup_COMP }}"'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: 'COMP='
+    line: 'COMP="{{ autopostgresqlbackup_COMP }}"'
   when: autopostgresqlbackup_COMP is defined
 
 - name: Set DBNAMES
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='^DBNAMES=' line='DBNAMES="{{ autopostgresqlbackup_DBNAMES }}"'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: '^DBNAMES='
+    line: 'DBNAMES="{{ autopostgresqlbackup_DBNAMES }}"'
   when: autopostgresqlbackup_DBNAMES is defined
 
 - name: Set DOWEEKLY
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='DOWEEKLY=' line='DOWEEKLY="{{ autopostgresqlbackup_DOWEEKLY }}"'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: 'DOWEEKLY='
+    line: 'DOWEEKLY="{{ autopostgresqlbackup_DOWEEKLY }}"'
   when: autopostgresqlbackup_DOWEEKLY is defined
 
 - name: Set MAILADDR
-  lineinfile: dest=/etc/default/autopostgresqlbackup regexp='MAILADDR=' line='MAILADDR="{{ autopostgresqlbackup_MAILADDR }}"'
+  lineinfile:
+    dest: /etc/default/autopostgresqlbackup
+    regexp: 'MAILADDR='
+    line: 'MAILADDR="{{ autopostgresqlbackup_MAILADDR }}"'
   when: autopostgresqlbackup_MAILADDR is defined
+
+- name: Disable the default autopostgresqlbackup in /etc/cron.daily/autopostgresqlbackup
+  # This cannot be done with one lineinfile, so we copy the patched file
+  copy:
+    src: etc/cron.daily/autopostgresqlbackup
+    dest: /etc/cron.daily/
+    mode: 0755
+  when: autopostgresqlbackup_cron_datetime is defined
+
+- name: Add cron.d script to do autopostgresqlbackup at {{ autopostgresqlbackup_cron_datetime }}
+  template:
+    src: etc/cron.d/local-autopostgresqlbackup
+    dest: /etc/cron.d/
+  when: autopostgresqlbackup_cron_datetime is defined
 
